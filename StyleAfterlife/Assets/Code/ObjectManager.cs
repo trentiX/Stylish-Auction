@@ -1,28 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 
 public class ObjectManager : MonoBehaviour
 {
-    [SerializeField] private GameObject HeavenLight;
-    [SerializeField] private GameObject HellLight;
     [SerializeField] private GameObject[] itemPrefabs;
+    [SerializeField] private TextMeshProUGUI cash;
+
     private Dictionary<GameObject, GameObject> spawnedItems; // Словарь для хранения созданных предметов
 
     private Item obj;
     private Note note;
-    
+    private string desicion;
+    private int score;
+
     private void Awake()
     {
         note = FindObjectOfType<Note>();
-        
+
         spawnedItems = new Dictionary<GameObject, GameObject>();
 
         foreach (GameObject prefab in itemPrefabs)
         {
             // Инициализация словаря созданными предметами, исключаем их с отключением состояния
-            spawnedItems[prefab] = null; 
+            spawnedItems[prefab] = null;
         }
     }
 
@@ -41,47 +44,74 @@ public class ObjectManager : MonoBehaviour
             // Отметка о завершении задачи
             note.jobDone = false;
         }
-        
+
         obj = FindObjectOfType<Item>();
     }
+
     public IEnumerator GoDown()
     {
         if (!note.jobDone)
         {
+            desicion = "earth";
             note.jobDone = true;
 
+            Cash();
             // Уведомление компонента Item
             obj.goToEarth();
-
-            // Активация света и ожидание
-            HellLight.SetActive(true);
-            HellLight.transform.DOMoveY(4.5f, 1);
-            yield return new WaitForSeconds(1);
-            HellLight.transform.DOMoveY(-11, 4).OnComplete(() =>
-            { 
-                HellLight.SetActive(false);
-            });
-
+            yield break;
         }
     }
-    
+
     public IEnumerator GoUp()
     {
         if (!note.jobDone)
         {
+            desicion = "heaven";
             note.jobDone = true;
 
+            Cash();
             // Уведомление компонента Item
             obj.goToHeaven();
+            yield break;
+        }
+    }
 
-            // Активация света и ожидание
-            HeavenLight.SetActive(true);
-            HeavenLight.transform.DOMoveY(11, 1);
-            yield return new WaitForSeconds(1);
-            HeavenLight.transform.DOMoveY(-11, 4).OnComplete(() =>
-            {
-                HeavenLight.SetActive(false);
-            });
+    private void Cash()
+    {
+        switch (desicion)
+        {
+            case "earth":
+                if (note.oldScore <= 200)
+                {
+                    score += note.oldScore;
+                    cash.text = score.ToString();
+                }
+                else
+                {
+                    if (score > note.oldScore)
+                    {
+                        score -= note.oldScore;
+                        cash.text = score.ToString();
+                    }
+                }
+                break;
+            case "heaven":
+                if (note.oldScore >= 200)
+                {
+                    score += note.oldScore;
+                    cash.text = score.ToString();
+                }
+                else
+                {
+                    if (score > note.oldScore)
+                    {
+                        score -= note.oldScore;
+                        cash.text = score.ToString();
+                    }
+                }
+                break;
+            default:
+                break;
         }
     }
 }

@@ -74,7 +74,9 @@ public class Item : MonoBehaviour, IInteractable
         int up = rnd.Next(0, upReplics.Length);
 
         _dialogueUI.showDialogue(upReplics[up]);
-        gameObject.transform.DOMoveY(20, 4).OnComplete(() =>
+        gameObject.transform.DORotate(new Vector3(0, 360, 0), 0.2f, RotateMode.FastBeyond360)
+            .SetLoops(-1, LoopType.Restart);
+        gameObject.transform.DOMoveX(200, 2).SetEase(Ease.InQuint).OnComplete(() =>
         {
             Destroy(gameObject);
         });
@@ -86,7 +88,9 @@ public class Item : MonoBehaviour, IInteractable
         int down = rnd.Next(0, downReplics.Length);
         
         _dialogueUI.showDialogue(downReplics[down]);
-        gameObject.transform.DOMoveY(-20, 2).OnComplete(() =>
+        gameObject.transform.DORotate(new Vector3(0, 360, 0), 0.2f, RotateMode.FastBeyond360)
+            .SetLoops(-1, LoopType.Restart);
+        gameObject.transform.DOMoveX(-200, 2).SetEase(Ease.InQuint).OnComplete(() =>
         {
             Destroy(gameObject);
         });;

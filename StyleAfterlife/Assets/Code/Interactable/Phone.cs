@@ -53,10 +53,10 @@ public class Phone : MonoBehaviour,IInteractable
 
                 switch (answer.ToUpper())
                 {
-                    case "UP":
+                    case "RIGHT":
                         StartCoroutine(_objectManager.GoUp());
                         break;
-                    case "DOWN":
+                    case "LEFT":
                         StartCoroutine(_objectManager.GoDown());
                         break;
                     default:
@@ -74,6 +74,6 @@ public class Phone : MonoBehaviour,IInteractable
 
     public string getName()
     {
-        return "Phone";
+        return "Phone" + "\n [E]";
     }
 }

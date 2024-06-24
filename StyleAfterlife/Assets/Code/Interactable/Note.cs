@@ -29,6 +29,11 @@ public class ItemCharacteristics
         AmountOfCopies = amountOfCopies;
         Remark = remark;
     }
+    
+    public int GetTotalScore()
+    {
+        return Creator.Value + Age.Value + Condition.Value + LastOwner.Value + Materials.Value + AmountOfCopies.Value + Remark.Value;
+    }
 }
 
 public class Note : MonoBehaviour, IInteractable
@@ -40,9 +45,10 @@ public class Note : MonoBehaviour, IInteractable
     [SerializeField] public TMP_InputField _inputField;
 
     private ItemCharacteristics currentCharacteristics;
+    public int oldScore = 0;
     private bool interacted = false;
     public bool jobDone = true;
-    private string name = "Note";
+    private string name = "Note" + "\n [E]";
 
     // Dictionary to hold all characteristics options
     private Dictionary<string, KeyValuePair<string, int>[]> characteristics = new Dictionary<string, KeyValuePair<string, int>[]>
@@ -84,7 +90,7 @@ public class Note : MonoBehaviour, IInteractable
         { "Age", new KeyValuePair<string, int>[]
             {
                 new KeyValuePair<string, int>("1000+ years old", 1000),
-                new KeyValuePair<string, int>("500 years old", 500),
+                new KeyValuePair<string, int>("500 years old", 200),
                 new KeyValuePair<string, int>("100 years old", 100),
                 new KeyValuePair<string, int>("50 years old", 50),
                 new KeyValuePair<string, int>("30 years old", 30),
@@ -214,7 +220,10 @@ public class Note : MonoBehaviour, IInteractable
         itemInfoText.text = newText;
     }
 
-
+    private int GetScore()
+    {
+        return currentCharacteristics.GetTotalScore();
+    }
     public string getName()
     {
         return name;
@@ -234,6 +243,8 @@ public class Note : MonoBehaviour, IInteractable
             if (!jobDone)
             {
                 GenerateRandomCharacteristics();
+                oldScore = GetScore();
+                Debug.Log(oldScore);
             }
         }
     }
@@ -241,7 +252,7 @@ public class Note : MonoBehaviour, IInteractable
     {
         if (Input.GetKeyDown(KeyCode.Escape) && interacted)
         {
-            name = "Note";
+            name = "Note" + "\n [E]";
             _canvasGroup.DOFade(0, 1);
             textNote.SetActive(false);
             fps.cameraCanMove = true;
