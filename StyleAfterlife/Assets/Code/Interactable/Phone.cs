@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class Phone : MonoBehaviour,IInteractable
 {
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip pickingUpPhone;
+    
     private Note _note;
     private ObjectManager _objectManager;
     private DialogueUI _dialogueUI;
@@ -17,12 +20,13 @@ public class Phone : MonoBehaviour,IInteractable
             "Write your verdict in a note and call to secure the answer, good luck!"
         };
 
-    private int callIndex = 0;
-    private bool firstDialogue = true;
+    public int callIndex = 0;
+    private bool pickingUp = true;
 
 
     private void Awake()
     {
+        _audioSource.Play();
         _objectManager = FindObjectOfType<ObjectManager>();
         _note = FindObjectOfType<Note>();
         _dialogueUI = FindObjectOfType<DialogueUI>();
@@ -30,41 +34,41 @@ public class Phone : MonoBehaviour,IInteractable
 
     public void Interact()
     {
-        if (firstDialogue)
-        {
-            StartCoroutine(FirstCall());
-        }
-        else
-        {
-            answer = _note._inputField.text;
-
-            switch (answer.ToUpper())
-            {
-                case "UP":
-                    StartCoroutine(_objectManager.GoUp());
-                    break;
-                case "DOWN":
-                    StartCoroutine(_objectManager.GoDown());
-                    break;
-                default:
-                    _dialogueUI.showDialogue("Write your answer in the note");
-                    break;
-            }
-        }
-    }
-
-    private IEnumerator FirstCall()
-    {
         if (callIndex < 7)
         {
+            if (pickingUp)
+            {
+                _audioSource.Stop();
+                _audioSource.PlayOneShot(pickingUpPhone);
+                pickingUp = false;
+            }
             _dialogueUI.showDialogue(calls[callIndex]);
-            yield return new WaitForSeconds(5);
             callIndex++;
-            StartCoroutine(FirstCall());
         }
         else
         {
-            firstDialogue = false;
+            if (!_note.jobDone)
+            {
+                answer = _note._inputField.text;
+
+                switch (answer.ToUpper())
+                {
+                    case "UP":
+                        StartCoroutine(_objectManager.GoUp());
+                        break;
+                    case "DOWN":
+                        StartCoroutine(_objectManager.GoDown());
+                        break;
+                    default:
+                        _dialogueUI.showDialogue("Write your answer in the note");
+                        break;
+                } 
+            }
+            else
+            {
+                _objectManager.Spawn();
+                _note.jobDone = false;
+            }
         }
     }
 

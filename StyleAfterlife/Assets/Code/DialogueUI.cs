@@ -8,9 +8,11 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private TMP_Text textLabel;
     
     private TypewriterEffect typewriterEffect;
+    private Phone _phone;
     
     private void Start()
     {
+        _phone = FindObjectOfType<Phone>();
         typewriterEffect = GetComponent<TypewriterEffect>();
     }
 
@@ -24,8 +26,12 @@ public class DialogueUI : MonoBehaviour
         yield return RunTypingEffect(label);
         textLabel.text = label;
         yield return null;
-        yield return new WaitForSeconds(4);
-        textLabel.text = null;
+
+        if (_phone.callIndex >= 7)
+        {
+            yield return new WaitForSeconds(4);
+            textLabel.text = null;
+        }
     }
 
     private IEnumerator RunTypingEffect(string dialogue)

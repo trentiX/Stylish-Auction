@@ -1,55 +1,67 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
-using Random = System.Random;
 
 public class ObjectManager : MonoBehaviour
 {
     [SerializeField] private GameObject HeavenLight;
     [SerializeField] private GameObject HellLight;
     [SerializeField] private GameObject[] itemPrefabs;
-    private Dictionary<GameObject, bool> spawnedItems; // Словарь предметов и их состояний
+    private Dictionary<GameObject, GameObject> spawnedItems; // Словарь для хранения созданных предметов
 
     private Item obj;
     private Note note;
     
     private void Awake()
     {
-        obj = FindObjectOfType<Item>();
         note = FindObjectOfType<Note>();
         
-        spawnedItems = new Dictionary<GameObject, bool>();
+        spawnedItems = new Dictionary<GameObject, GameObject>();
+
         foreach (GameObject prefab in itemPrefabs)
         {
-            spawnedItems[prefab] = false; // Инициализация предмета как не созданного
+            // Инициализация словаря созданными предметами, исключаем их с отключением состояния
+            spawnedItems[prefab] = null; 
         }
     }
 
     public void Spawn()
     {
-        int randomIndex = UnityEngine.Random.Range(0, itemPrefabs.Length);
+        // Выбор случайного префаба
+        int randomIndex = Random.Range(0, itemPrefabs.Length);
         GameObject randomPrefab = itemPrefabs[randomIndex];
 
-        if (!spawnedItems[randomPrefab])
+        if (spawnedItems[randomPrefab] == null)
         {
-            // Создаем экземпляр случайного предмета
+            // Создание экземпляра случайного предмета
             GameObject spawnedItem = Instantiate(randomPrefab, transform.position, Quaternion.identity);
-            spawnedItems[randomPrefab] = true; // Устанавливаем флаг созданного предмета
+            spawnedItems[randomPrefab] = spawnedItem; // Сохранение ссылки на созданный предмет
+
+            // Отметка о завершении задачи
+            note.jobDone = false;
         }
         
-        note.jobDone = false;
+        obj = FindObjectOfType<Item>();
     }
     public IEnumerator GoDown()
     {
         if (!note.jobDone)
         {
-            obj.goToEarth();
-            HellLight.SetActive(true);
-
-            yield return new WaitForSeconds(3);
-            HellLight.SetActive(false);
             note.jobDone = true;
+
+            // Уведомление компонента Item
+            obj.goToEarth();
+
+            // Активация света и ожидание
+            HellLight.SetActive(true);
+            HellLight.transform.DOMoveY(4.5f, 1);
+            yield return new WaitForSeconds(1);
+            HellLight.transform.DOMoveY(-11, 4).OnComplete(() =>
+            { 
+                HellLight.SetActive(false);
+            });
+
         }
     }
     
@@ -57,12 +69,19 @@ public class ObjectManager : MonoBehaviour
     {
         if (!note.jobDone)
         {
-            obj.goToHeaven();
-            HeavenLight.SetActive(true);
-
-            yield return new WaitForSeconds(3);
-            HeavenLight.SetActive(false);
             note.jobDone = true;
+
+            // Уведомление компонента Item
+            obj.goToHeaven();
+
+            // Активация света и ожидание
+            HeavenLight.SetActive(true);
+            HeavenLight.transform.DOMoveY(11, 1);
+            yield return new WaitForSeconds(1);
+            HeavenLight.transform.DOMoveY(-11, 4).OnComplete(() =>
+            {
+                HeavenLight.SetActive(false);
+            });
         }
     }
 }

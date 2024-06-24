@@ -231,7 +231,7 @@ public class Note : MonoBehaviour, IInteractable
             interacted = true;
             _inputField.ActivateInputField();
 
-            if (jobDone)
+            if (!jobDone)
             {
                 GenerateRandomCharacteristics();
             }
